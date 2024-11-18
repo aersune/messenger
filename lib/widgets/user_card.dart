@@ -1,31 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:messenger/screens/chat_room_screen.dart';
+import 'package:provider/provider.dart';
 
+import '../provider/theme_provider.dart';
 import '../utils/colors.dart';
 
 class UserCard extends StatelessWidget {
-  const UserCard({super.key});
+  final String name;
+  // final String imageUrl;
+  final String email;
+  final VoidCallback callback;
+  const UserCard({super.key, required this.name,  required this.email, required this.callback});
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = context.watch<ThemeProvider>();
     return Material(
       color: Colors.transparent,
-
       child: InkWell(
         splashColor: AppColors.dark2.withOpacity(.4),
         highlightColor: AppColors.light.withOpacity(.4),
         // highlightColor: Colors.white,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return const ChatRoomScreen();
-          }));
+          callback();
         },
         child: Ink(
-          decoration: const BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+          decoration:  BoxDecoration(
+            color: theme.isDark ? AppColors.dark.withOpacity(.8) : AppColors.light.withOpacity(.3),
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
           height: size.height * 0.1,
           width: size.width,
@@ -53,16 +57,16 @@ class UserCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Danny Hopkins",
-                    style: TextStyle(
+                   Text(
+                    name,
+                    style: const TextStyle(
                       fontSize: 20,
                       color: AppColors.light,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
-                    "dannylove@gmail.com",
+                    email,
                     style: TextStyle(
                       fontSize: 15,
                       color: AppColors.light.withOpacity(.7),
