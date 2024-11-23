@@ -8,6 +8,9 @@ class Message {
   final String receiverId;
   final String senderEmail;
   final Timestamp timestamp;
+  final bool isRead;
+  final bool isChanged;
+
 
 
   Message({
@@ -16,6 +19,8 @@ class Message {
     required this.receiverId,
     required this.senderEmail,
     required this.timestamp,
+    this.isChanged = false,
+    this.isRead = false,
   });
 
 
@@ -25,6 +30,8 @@ class Message {
     'receiverId': receiverId,
     'senderEmail': senderEmail,
     'timestamp': timestamp,
+    "isRead": isRead,
+    "isChanged": isChanged,
   };
 
 }

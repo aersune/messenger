@@ -14,12 +14,20 @@ class ThemeProvider extends ChangeNotifier {
     brightness: Brightness.dark,
     primaryColor: AppColors.dark,
     primaryColorDark: AppColors.dark,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.dark,
+    ),
+    scaffoldBackgroundColor: AppColors.dark,
     // Define other dark theme properties here
   );
   final lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: Colors.white,
+    primaryColor: AppColors.primary,
     primaryColorDark: Colors.white,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.primary,
+    ),
+    scaffoldBackgroundColor: AppColors.primary,
     // Define other light theme properties here
   );
 

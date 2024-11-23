@@ -25,7 +25,7 @@ class AuthService extends ChangeNotifier{
         'uid': userCredential.user!.uid,
         'name': userCredential.user!.displayName,
         'email': userCredential.user!.email,
-      },  SetOptions(merge: true));
+      },  SetOptions(merge: false));
       return await FirebaseAuth.instance.signInWithCredential(credential);
     } on Exception catch(e){
       print('exception: $e');

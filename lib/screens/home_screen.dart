@@ -2,17 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:messenger/utils/colors.dart';
 import 'package:messenger/widgets/drawer_menu.dart';
 import 'package:messenger/widgets/user_card.dart';
-import 'package:provider/provider.dart';
-
-import '../provider/theme_provider.dart';
 import 'chat_room_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -22,11 +17,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<ThemeProvider>();
     return Scaffold(
       drawer: const DrawerMenu(),
       appBar: AppBar(
-        backgroundColor: theme.isDark ? AppColors.dark : AppColors.primary,
         title: const Text("Messages"),
         actions: [
           IconButton(
@@ -41,15 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      backgroundColor: Colors.white,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
 
-        decoration: BoxDecoration(
-            color: theme.isDark ? AppColors.dark : AppColors.primary,
-           ),
-        child:  Padding(
+      body: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, ),
           child: _buildUserList(),
         ),
@@ -68,6 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
           return const Text("Loading");
         }
         return ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(vertical: 20),
           children: snapshot.data!.docs.map((DocumentSnapshot document) {
             Map<String, dynamic> data = document.data()! as Map<String, dynamic>;

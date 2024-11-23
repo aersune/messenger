@@ -17,7 +17,7 @@ void main() async {
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => AuthService()),
-      ChangeNotifierProvider(create: (context) => ChatService()),
+      ChangeNotifierProvider(create: (context) => ChatService()..getUserData()),
       ChangeNotifierProvider(create: (context) => ThemeProvider()..init()),
     ], child: const MyApp(),)
       //connect auth servive provider
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
           themeMode: theme.isDark ? ThemeMode.dark : ThemeMode.light,
           darkTheme: theme.darkTheme,
           theme: ThemeData(
+            scaffoldBackgroundColor: AppColors.primary,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
             appBarTheme:  AppBarTheme(
