@@ -61,7 +61,6 @@ class _UserProfileState extends State<UserProfile> {
             TextField(
                 focusNode: nameFocusNode,
                 controller: nameController,
-
                 decoration: InputDecoration(
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                   filled: true,

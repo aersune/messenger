@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:messenger/screens/chat_room_screen.dart';
 import 'package:provider/provider.dart';
-
 import '../provider/theme_provider.dart';
 import '../utils/colors.dart';
 
@@ -10,7 +8,8 @@ class UserCard extends StatelessWidget {
   // final String imageUrl;
   final String email;
   final VoidCallback callback;
-  const UserCard({super.key, required this.name,  required this.email, required this.callback});
+  final bool isOnline;
+  const UserCard({super.key, required this.name,  required this.email, required this.callback, required this.isOnline});
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +38,31 @@ class UserCard extends StatelessWidget {
               const SizedBox(
                 width: 20,
               ),
-              Container(
-                height: size.height * 0.08,
-                width: size.width * 0.15,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage("https://picsum.photos/200"),
-                      fit: BoxFit.cover,
-                    )),
+              Stack(
+                children: [
+                  Container(
+                    height: size.height * 0.08,
+                    width: size.width * 0.15,
+                    decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: NetworkImage("https://picsum.photos/200"),
+                          fit: BoxFit.cover,
+                        )),
+                  ),
+                  Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                    width: size.width * 0.04,
+                    height: size.width * 0.04,
+                    decoration:  BoxDecoration(
+                      color: isOnline ? Colors.blue : AppColors.dark4,
+                      shape: BoxShape.circle,
+                    )
+                  ))
+                ],
               ),
               const SizedBox(
                 width: 20,

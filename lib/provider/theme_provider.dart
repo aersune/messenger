@@ -24,10 +24,16 @@ class ThemeProvider extends ChangeNotifier {
     brightness: Brightness.light,
     primaryColor: AppColors.primary,
     primaryColorDark: Colors.white,
+    popupMenuTheme: const PopupMenuThemeData(
+      color: AppColors.primary2,
+      textStyle: TextStyle(color: AppColors.light),
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.primary,
     ),
+
     scaffoldBackgroundColor: AppColors.primary,
+
     // Define other light theme properties here
   );
 

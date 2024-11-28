@@ -38,7 +38,7 @@ class _PinataApiState extends State<PinataApi> {
       );
       final fileData = jsonDecode(fileRequest.body);
       // Get the CID
-      final cid = fileData['data']['files'][0]['cid'];
+      // final cid = fileData['data']['files'][0]['cid'];
       // Construct the payload
       final data = jsonEncode({
         "url": "https://$gateway/files/$imageId", // Construct the URL with the gateway and CID of the file

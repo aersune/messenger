@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:messenger/model/message.dart';
 
@@ -11,14 +12,35 @@ class ChatService extends ChangeNotifier {
   final FocusNode messageFocusNode = FocusNode();
   TextEditingController messageController = TextEditingController();
 
-
-
   String editingMessageId = "";
-    UserData userData = UserData(email: '',name: '', uid: '');
+  String editingMessage = "";
+  String repliedMessageSenderId = "";
+  UserData userData = UserData(email: '', name: '', uid: '', isOnline: false);
   var isEditing = false;
+  bool isReplying = false;
+  bool whoSender = false;
+  bool isScrolling = false;
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    messageFocusNode.dispose();
+    super.dispose();
+  }
+
+  void clearMessage() {
+    messageController.clear();
+    notifyListeners();
+  }
+   scrollEvent(bool isScroll) {
+    isScrolling = isScroll;
+    print('provider scrolll: $isScrolling');
+
+    notifyListeners();
+  }
 
   Future<void> getUserData() async {
-    final user =  _firebaseAuth.currentUser;
+    final user = _firebaseAuth.currentUser;
     final userDataDb = await _firebaseFirestore.collection('users').doc(user!.uid).get();
     userData = UserData.fromJson(userDataDb.data()!);
 
@@ -33,16 +55,46 @@ class ChatService extends ChangeNotifier {
 
   //get user data
 
-  editMessage(String messageId, String message, context) async {
+  setMessage(
+    String messageId,
+    String message,
+  ) {
     editingMessageId = messageId;
     messageController.text = message;
+    editingMessage = message;
+    messageFocusNode.requestFocus();
     isEditing = true;
-    FocusScope.of(context).requestFocus(messageFocusNode);
+    notifyListeners();
+  }
+
+  cancelEditing() {
+    editingMessageId = "";
+    editingMessage = "";
+    messageController.clear();
+    messageFocusNode.unfocus();
+    isEditing = false;
+    isReplying = false;
+    notifyListeners();
+  }
+
+  replayMessage({required String message, required String senderId, required String messageId}) {
+    isReplying = true;
+    senderId == _firebaseAuth.currentUser!.uid ? whoSender = true : whoSender = false;
+    editingMessageId = messageId;
+    repliedMessageSenderId = senderId;
+    editingMessage = message;
+    messageFocusNode.requestFocus();
     notifyListeners();
   }
 
   //Send message
-  Future<void> sendMessage(String receiverId, String message) async {
+  Future<void> sendMessage(
+      {required String receiverId,
+      required String message,
+      required bool isReply,
+      required String replyUser,
+      required String replyMessId,
+      required String repliedMessage}) async {
     // get current user info
     final String currentUserId = _firebaseAuth.currentUser!.uid;
     final String currentUserEmail = _firebaseAuth.currentUser!.email.toString();
@@ -55,6 +107,10 @@ class ChatService extends ChangeNotifier {
       receiverId: receiverId,
       senderEmail: currentUserEmail,
       timestamp: timestamp,
+      isReplied: isReply,
+      repliedMessage: isReply ? repliedMessage : '',
+      repliedMessageId: isReply ? replyMessId : '',
+      repliedMessageSenderId: isReply ? replyUser : '',
     );
 
     // construct chat room id from current user id and receiver id
@@ -67,6 +123,14 @@ class ChatService extends ChangeNotifier {
 
     //add new message to database
     await _firebaseFirestore.collection('chat_rooms').doc(chatRoomId).collection('messages').add(newMessage.toMap());
+    cancelReply();
+  }
+
+  cancelReply() {
+    isReplying = false;
+    editingMessageId = "";
+    editingMessage = "";
+    notifyListeners();
   }
 
   Stream<QuerySnapshot> getMessages(String userId, String otherUserId) {
@@ -100,13 +164,29 @@ class ChatService extends ChangeNotifier {
         .doc(messageId)
         .delete()
         .then((value) {
-      print('Message deleted successfully');
+      if (kDebugMode) {
+        print('Message deleted successfully');
+      }
     }).catchError((error) {
-      print('Error deleting message: $error');
+      if (kDebugMode) {
+        print('Error deleting message: $error');
+      }
     });
 
-    notifyListeners();
+    // notifyListeners();
   }
+  Future<void> clearHistory(String otherUserId) async {
+    List<String> ids = [
+      _firebaseAuth.currentUser!.uid,
+      otherUserId,
+    ];
+    ids.sort();
+    String chatRoomId = ids.join('_');
+    await _firebaseFirestore.collection('chat_rooms').doc(chatRoomId).collection('messages').get().then((querySnapshot) {
+      for (var doc in querySnapshot.docs) {
+        doc.reference.delete();
+      }
+    });}
 
   Future<void> updateMessageReadStatus(String messageId) async {
     await _firebaseFirestore.collection('chat_rooms').doc(messageId).update({
@@ -128,9 +208,7 @@ class ChatService extends ChangeNotifier {
       'isChanged': true,
     });
 
-    print('updated');
     notifyListeners();
   }
-
 }
 // get messages
