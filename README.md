@@ -51,12 +51,10 @@
         <pre style="background-color: #ecf0f1; padding: 10px; border-radius: 4px; overflow-x: auto;"><code>flutter run</code></pre>
     </ol>
     <h2 style="color: #2c3e50;">Screenshots</h2>
-    <p style="color: #34495e;">*Add some screenshots of your app here to showcase its features and UI.*</p>
+    <p style="color: #34495e;">     </p>
     <h2 style="color: #2c3e50;">Contributing</h2>
     <p style="color: #34495e;">If you would like to contribute to this project, please fork the repository and submit a pull request. We appreciate your contributions!</p>
-    <h2 style="color: #2c3e50;">License</h2>
-    <p style="color: #34495e;">This project is licensed under the MIT License. See the <a href="LICENSE">LICENSE</a> file for more details.</p>
     <h2 style="color: #2c3e50;">Contact</h2>
-    <p style="color: #34495e;">If you have any questions or feedback, feel free to reach out to <a href="mailto:your-email@example.com">Your Name</a>.</p>
+    <p style="color: #34495e;">If you have any questions or feedback, feel free to reach out to <a href="mailto:aersune@gmail.com">Javokhir</a>.</p>
 </body>
 </html>
