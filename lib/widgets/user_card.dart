@@ -1,15 +1,21 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:messenger/model/user.dart';
 import 'package:provider/provider.dart';
 import '../provider/theme_provider.dart';
 import '../utils/colors.dart';
 
 class UserCard extends StatelessWidget {
-  final String name;
-  // final String imageUrl;
-  final String email;
   final VoidCallback callback;
   final bool isOnline;
-  const UserCard({super.key, required this.name,  required this.email, required this.callback, required this.isOnline});
+  final UserData userData;
+
+  const UserCard({
+    super.key,
+    required this.callback,
+    required this.isOnline,
+    required this.userData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +26,12 @@ class UserCard extends StatelessWidget {
       child: InkWell(
         splashColor: AppColors.dark2.withOpacity(.4),
         highlightColor: AppColors.light.withOpacity(.4),
-        // highlightColor: Colors.white,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
         onTap: () {
           callback();
         },
         child: Ink(
-          decoration:  BoxDecoration(
+          decoration: BoxDecoration(
             color: theme.isDark ? AppColors.dark.withOpacity(.8) : AppColors.light.withOpacity(.3),
             borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
@@ -43,25 +48,26 @@ class UserCard extends StatelessWidget {
                   Container(
                     height: size.height * 0.08,
                     width: size.width * 0.15,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: NetworkImage("https://picsum.photos/200"),
+                          image: CachedNetworkImageProvider(userData.imageUrl),
                           fit: BoxFit.cover,
                         )),
                   ),
                   Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                    width: size.width * 0.04,
-                    height: size.width * 0.04,
-                    decoration:  BoxDecoration(
-                      color: isOnline ? Colors.blue : AppColors.dark4,
-                      shape: BoxShape.circle,
-                    )
-                  ))
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: size.width * 0.04,
+                      height: size.width * 0.04,
+                      decoration: BoxDecoration(
+                        color: isOnline ? Colors.blue : AppColors.dark4,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  )
                 ],
               ),
               const SizedBox(
@@ -71,8 +77,8 @@ class UserCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Text(
-                    name,
+                  Text(
+                    userData.name,
                     style: const TextStyle(
                       fontSize: 20,
                       color: AppColors.light,
@@ -80,23 +86,15 @@ class UserCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    email,
+                    userData.email,
                     style: TextStyle(
                       fontSize: 15,
                       color: AppColors.light.withOpacity(.7),
                       fontWeight: FontWeight.w500,
                     ),
-                  )
+                  ),
                 ],
               ),
-              const Spacer(),
-              Text(
-                'Tue',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.light.withOpacity(.7)),
-              ),
-              const SizedBox(
-                width: 20,
-              )
             ],
           ),
         ),

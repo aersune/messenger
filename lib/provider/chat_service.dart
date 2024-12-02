@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:messenger/model/message.dart';
+import 'package:uuid/uuid.dart';
 
 import '../model/user.dart';
 
@@ -15,7 +20,7 @@ class ChatService extends ChangeNotifier {
   String editingMessageId = "";
   String editingMessage = "";
   String repliedMessageSenderId = "";
-  UserData userData = UserData(email: '', name: '', uid: '', isOnline: false);
+  UserData userData = UserData(email: '', name: '', uid: '', isOnline: false, imageUrl: '');
   var isEditing = false;
   bool isReplying = false;
   bool whoSender = false;
@@ -32,18 +37,41 @@ class ChatService extends ChangeNotifier {
     messageController.clear();
     notifyListeners();
   }
-   scrollEvent(bool isScroll) {
-    isScrolling = isScroll;
-    print('provider scrolll: $isScrolling');
 
-    notifyListeners();
-  }
+
+  // scrollEvent(bool isScroll) {
+  //   isScrolling = isScroll;
+  //   print('provider scrolll: $isScrolling');
+  //
+  //   notifyListeners();
+  // }
 
   Future<void> getUserData() async {
     final user = _firebaseAuth.currentUser;
     final userDataDb = await _firebaseFirestore.collection('users').doc(user!.uid).get();
     userData = UserData.fromJson(userDataDb.data()!);
+    notifyListeners();
+  }
 
+
+
+
+  Future<void> changeImage() async {
+    late File userProfileImage;
+      final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        userProfileImage = File(pickedFile.path);
+      }
+
+
+    final user = _firebaseAuth.currentUser;
+    final imageName = const Uuid().v1();
+    final ref = FirebaseStorage.instance.ref().child('user_image/$imageName');
+
+    await ref.putFile(userProfileImage);
+    final imageUrl = await ref.getDownloadURL();
+    await _firebaseFirestore.collection('users').doc(user!.uid).update({"photoUrl": imageUrl});
+    getUserData();
     notifyListeners();
   }
 
@@ -94,7 +122,9 @@ class ChatService extends ChangeNotifier {
       required bool isReply,
       required String replyUser,
       required String replyMessId,
-      required String repliedMessage}) async {
+      required String repliedMessage,
+      bool isFile = false,
+      String filePath = ''}) async {
     // get current user info
     final String currentUserId = _firebaseAuth.currentUser!.uid;
     final String currentUserEmail = _firebaseAuth.currentUser!.email.toString();
@@ -111,6 +141,8 @@ class ChatService extends ChangeNotifier {
       repliedMessage: isReply ? repliedMessage : '',
       repliedMessageId: isReply ? replyMessId : '',
       repliedMessageSenderId: isReply ? replyUser : '',
+      isFile: isFile,
+      filePath: filePath,
     );
 
     // construct chat room id from current user id and receiver id
@@ -175,6 +207,7 @@ class ChatService extends ChangeNotifier {
 
     // notifyListeners();
   }
+
   Future<void> clearHistory(String otherUserId) async {
     List<String> ids = [
       _firebaseAuth.currentUser!.uid,
@@ -182,11 +215,17 @@ class ChatService extends ChangeNotifier {
     ];
     ids.sort();
     String chatRoomId = ids.join('_');
-    await _firebaseFirestore.collection('chat_rooms').doc(chatRoomId).collection('messages').get().then((querySnapshot) {
+    await _firebaseFirestore
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .get()
+        .then((querySnapshot) {
       for (var doc in querySnapshot.docs) {
         doc.reference.delete();
       }
-    });}
+    });
+  }
 
   Future<void> updateMessageReadStatus(String messageId) async {
     await _firebaseFirestore.collection('chat_rooms').doc(messageId).update({
@@ -209,6 +248,59 @@ class ChatService extends ChangeNotifier {
     });
 
     notifyListeners();
+  }
+
+  Future<void> sendImageMessage(
+      {required String receiverId,
+
+      required bool isReply,
+      required String replyUser,
+      required String replyMessId,
+      required String repliedMessage}) async {
+
+    File? selectedFile;
+    String? downloadURL;
+    final picker = ImagePicker();
+    final fileName = const Uuid().v4();
+
+    Future<void> selectFile() async {
+      final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        selectedFile = File(pickedFile.path);
+      }
+    }
+
+    Future<void> uploadFile() async {
+      if (selectedFile != null) {
+        final storage = FirebaseStorage.instance;
+        final storageRef = storage.ref();
+        final uploadRef = storageRef.child('images/$fileName');
+
+        try {
+          await uploadRef.putFile(selectedFile!);
+          downloadURL = await uploadRef.getDownloadURL();
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error uploading file: $e');
+          }
+        }
+      }
+    }
+
+    await selectFile();
+    await uploadFile();
+    if (downloadURL != null) {
+      await sendMessage(
+        receiverId: receiverId,
+        message: '',
+        isReply: isReply,
+        replyUser: replyUser,
+        replyMessId: replyMessId,
+        repliedMessage: repliedMessage,
+        isFile: true,
+        filePath: downloadURL ?? '',
+      );
+    }
   }
 }
 // get messages

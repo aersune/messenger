@@ -6,7 +6,6 @@ import 'package:messenger/provider/auth_servive.dart';
 import 'package:messenger/provider/chat_service.dart';
 import 'package:messenger/provider/theme_provider.dart';
 import 'package:messenger/provider/user_status.dart';
-import 'package:messenger/screens/teset.dart';
 import 'package:messenger/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
@@ -19,7 +18,7 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => AuthService()),
-      ChangeNotifierProvider(create: (context) => ChatService()..getUserData()),
+      ChangeNotifierProvider(create: (context) => ChatService()),
       ChangeNotifierProvider(create: (context) => ThemeProvider()..init()),
       ChangeNotifierProvider(create: (context) => UserStatusService()),
     ],
@@ -33,8 +32,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final userStatusService = Provider.of<UserStatusService>(context, listen: false);
-    userStatusService.init();
 
     return Consumer<ThemeProvider>(builder: (context, ThemeProvider theme, child) {
       return MaterialApp(
@@ -56,9 +53,10 @@ class MyApp extends StatelessWidget {
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
-              centerTitle: true),
+              centerTitle: true,
+          ),
         ),
-        home:  AppBarWidget(),
+        home:  const AuthCheck(),
       );
     });
   }

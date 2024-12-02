@@ -1,26 +1,30 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:intl/intl.dart';
+import 'package:messenger/model/user.dart';
 import 'package:messenger/provider/chat_service.dart';
 import 'package:messenger/utils/colors.dart';
 import 'package:messenger/widgets/message_widget.dart';
+import 'package:messenger/widgets/user_profile_info.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../model/message.dart';
 import '../provider/theme_provider.dart';
 
 class ChatRoomScreen extends StatefulWidget {
-  final String receiverUserId;
-  final String receiverUserEmail;
-  final String receiverUserName;
+  final UserData userData;
 
-  const ChatRoomScreen(
-      {super.key, required this.receiverUserId, required this.receiverUserEmail, required this.receiverUserName});
+  const ChatRoomScreen({
+    super.key,
+    required this.userData,
+  });
 
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -29,76 +33,34 @@ class ChatRoomScreen extends StatefulWidget {
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final ChatService _chatService = ChatService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ScrollController _scrollController = ScrollController();
-  final Map<String, GlobalKey> _messageKeys = {};
+  final Map<String, int> _messageKeys = {};
+  final ItemScrollController _itemScrollController = ItemScrollController();
 
   bool isScrolled = false;
 
-  void _scrollToMessage(String messageId) {
-    final context = _messageKeys[messageId]?.currentContext;
-    if (context != null && _scrollController.hasClients) {
-      final renderBox = context.findRenderObject() as RenderBox;
-      final position = renderBox.localToGlobal(Offset.zero).dy;
-      final offset = _scrollController.offset + position - (MediaQuery.of(context).size.height / 2);
-      _scrollController.animateTo(
-        offset,
-        duration: const Duration(seconds: 1),
-        curve: Curves.easeInOut,
-      );
-    }
+  Future scrollToItem(int index) async {
+    await _itemScrollController.scrollTo(
+      index: index,
+      duration: const Duration(seconds: 1),
+      alignment: .5,
+      curve: Curves.easeInOut,
+    );
   }
 
   void navToFirst() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.minScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+    _itemScrollController.scrollTo(
+      index: 0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeIn,
-      );
-    }
-  }
+  //
+
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        final context = _scrollController.position.context.storageContext;
-        Scrollable.ensureVisible(
-          context,
-          duration: const Duration(milliseconds: 300),
-          alignment: 1.0,
-          curve: Curves.easeIn,
-        );
-      }
-
-      // Future.delayed(const Duration(milliseconds: 100), () {
-      //   if (_scrollController.hasClients) {
-      //     _scrollController.jumpTo(_scrollController.position.maxScrollExtent + 400);
-      //
-      //     // _scrollController.addListener((){
-      //     //   if(_scrollController.offset < _scrollController.position.maxScrollExtent - 400) {
-      //     //
-      //     //     // print('scroll');
-      //     //     _chatService.scrollEvent(true);
-      //     //   }else{
-      //     //     // print('false scroll');
-      //     //     _chatService.scrollEvent(false);
-      //     //   }
-      //     //
-      //     // });
-      //   }
-      // });
-    });
+    // _lastMess();
     super.initState();
   }
 
@@ -108,18 +70,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final size = MediaQuery.of(context).size;
     final chatProvider = Provider.of<ChatService>(context, listen: false);
     final chatWatch = context.read<ChatService>();
-    // bool isScrolled = chatWatch.isScrolling;
-    // _scrollController.addListener((){
-    //   if(_scrollController.offset < _scrollController.position.maxScrollExtent - 400) {
-    //
-    //     // print('scroll');
-    //     chatProvider.scrollEvent(true);
-    //   }else{
-    //     // print('false scroll');
-    //     chatProvider.scrollEvent(false);
-    //   }
-    //
-    // });
+
     return WillPopScope(
       onWillPop: () async {
         chatProvider.messageController.clear();
@@ -131,22 +82,30 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         appBar: AppBar(
           elevation: 0,
           backgroundColor: theme.isDark ? AppColors.dark : AppColors.primary,
-          // automaticallyImplyLeading: false,
-          title: Row(
-            children: [
-              const CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage("https://picsum.photos/200"),
-              ),
-              const SizedBox(width: 16),
-              Text(widget.receiverUserName),
-            ],
+          title: InkWell(
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => UserProfileInfo(userData: widget.userData)));
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(radius: 20, backgroundImage: CachedNetworkImageProvider(widget.userData.imageUrl)),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: size.width * .35,
+                  child: Text(
+                    widget.userData.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             IconButton(
-              onPressed: () {
-                print(chatWatch.isReplying);
-              },
+              onPressed: () {},
               icon: const Icon(
                 CupertinoIcons.search,
                 opticalSize: 50,
@@ -158,7 +117,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   if (val == 'first') {
                     navToFirst();
                   } else if (val == 'clear') {
-                    // open showmodal and as clear history or not
                     showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -168,7 +126,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 actions: [
                                   TextButton(
                                     onPressed: () {
-                                      chatProvider.clearHistory(widget.receiverUserId);
+                                      chatProvider.clearHistory(widget.userData.uid);
                                       Navigator.pop(context);
                                     },
                                     child: const Text('Yes', style: TextStyle(color: Colors.white)),
@@ -180,7 +138,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 ]));
                   }
                 },
-                color:  theme.isDark ? AppColors.dark : AppColors.deepGreen,
+                color: theme.isDark ? AppColors.dark : AppColors.deepGreen,
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                       const PopupMenuItem<String>(
                         value: 'first',
@@ -241,7 +199,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 Text(
                                   chatWatch.whoSender
                                       ? "Reply to ${chatWatch.userData.name}"
-                                      : "Reply to  ${widget.receiverUserName}",
+                                      : "Reply to  ${widget.userData.name}",
                                   style: const TextStyle(
                                       color: AppColors.light, fontWeight: FontWeight.w500, letterSpacing: 1),
                                 ),
@@ -312,26 +270,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     ..withOpacity(.5),
                   width: size.width,
                   child: SendMessageWidget(
-                    receiverUserId: widget.receiverUserId,
+                    receiverUserId: widget.userData.uid,
                   ),
                 ),
               ],
             ),
-            isScrolled
-                ? Positioned(
-                    bottom: size.height * 0.1,
-                    right: 16,
-                    child: IconButton.outlined(
-                        style: IconButton.styleFrom(
-                            side: const BorderSide(color: Colors.transparent),
-                            padding: const EdgeInsets.all(10),
-                            backgroundColor: theme.isDark ? AppColors.textFieldDark : AppColors.primary2),
-                        onPressed: _scrollToBottom,
-                        icon: const Icon(
-                          CupertinoIcons.chevron_down,
-                          color: AppColors.teal,
-                        )))
-                : const SizedBox(),
           ],
         ),
       ),
@@ -340,7 +283,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   Widget _buildMessageList() {
     return StreamBuilder(
-        stream: _chatService.getMessages(widget.receiverUserId, _auth.currentUser!.uid),
+        stream: _chatService.getMessages(widget.userData.uid, _auth.currentUser!.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
@@ -348,13 +291,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            if (_scrollController.hasClients) {
-              _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-            }
+          SchedulerBinding.instance.addPostFrameCallback((_) async {
+            _itemScrollController.jumpTo(
+              index: snapshot.data!.docs.length - 1,
+            );
           });
-          return ListView.builder(
-            controller: _scrollController,
+          return ScrollablePositionedList.builder(
+            itemScrollController: _itemScrollController,
             physics: const ClampingScrollPhysics(),
             // physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -362,16 +305,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             itemBuilder: (context, index) {
               var document = snapshot.data!.docs[index];
               var messageId = document.id;
-              _messageKeys[messageId] = GlobalKey();
 
-              return _buildMessageItem(snapshot: document, key: _messageKeys[messageId]!, messageId: messageId);
+              _messageKeys[messageId] = index;
+
+              // _messageKeys[messageId] = GlobalKey();
+              // _messageKeys2.add(GlobalKey());
+
+              return _buildMessageItem(
+                snapshot: document,
+              );
             },
             // children: snapshot.data!.docs.map((document) => _buildMessageItem(document)).toList(),
           );
         });
   }
 
-  Widget _buildMessageItem({required DocumentSnapshot snapshot, required GlobalKey key, required messageId}) {
+  Widget _buildMessageItem({
+    required DocumentSnapshot snapshot,
+  }) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     bool whoSender = data['senderId'] == _auth.currentUser!.uid;
     final theme = context.watch<ThemeProvider>();
@@ -387,7 +338,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           mainAxisAlignment: whoSender ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: [
             ConstrainedBox(
-              key: key,
+              // key: key,
               // key: isResponse ? _responseKey : null,
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.75,
@@ -402,6 +353,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   senderId: message.senderId,
                 ),
                 child: Container(
+                  // key: key,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: whoSender ? senderColor : receiverColor,
@@ -414,7 +366,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       message.isReplied == true
                           ? InkWell(
                               onTap: () {
-                                _scrollToMessage(message.repliedMessageId!);
+                                scrollToItem(_messageKeys[message.repliedMessageId]!);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(5),
@@ -430,9 +382,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      message.repliedMessageSenderId != widget.receiverUserId
-                                          ? "${userData.name}"
-                                          : widget.receiverUserName,
+                                      message.repliedMessageSenderId != widget.userData.uid
+                                          ? userData.name
+                                          : widget.userData.name,
                                       style: const TextStyle(
                                           fontSize: 15, color: AppColors.light, fontWeight: FontWeight.w500),
                                     ),
@@ -452,11 +404,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                             )
                           : const SizedBox.shrink(),
                       const SizedBox(height: 5),
-                      Text(
-                        textAlign: TextAlign.left,
-                        message.message,
-                        style: const TextStyle(color: AppColors.light, fontSize: 18),
-                      ),
+                      !message.isFile
+                          ? Text(
+                              textAlign: TextAlign.left,
+                              message.message,
+                              style: const TextStyle(color: AppColors.light, fontSize: 18),
+                            )
+                          : InstaImageViewer(
+                              child: CachedNetworkImage(
+                                  width: MediaQuery.of(context).size.width * 0.45,
+                                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                                  imageUrl: message.filePath!),
+                            ),
+                      const SizedBox(height: 5),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -542,7 +503,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         chatService.setMessage(messageId, message);
         // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Edit feature not implemented')));
       } else if (value == 'delete') {
-        chatService.deleteMessage(messageId: messageId, otherUserId: widget.receiverUserId);
+        chatService.deleteMessage(messageId: messageId, otherUserId: widget.userData.uid);
         // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Delete feature not implemented')));
       } else if (value == 'reply') {
         chatService.replayMessage(message: message, senderId: senderId, messageId: messageId);

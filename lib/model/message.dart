@@ -12,6 +12,8 @@ class Message {
   final String? repliedMessage;
   final String? repliedMessageId;
   final String? repliedMessageSenderId;
+  final bool isFile;
+  final String? filePath;
 
   Message({
     required this.message,
@@ -25,6 +27,8 @@ class Message {
     required this.repliedMessage,
     required this.repliedMessageId,
     required this.repliedMessageSenderId,
+    this.isFile = false,
+    this.filePath = '',
   });
 
   Map<String, dynamic> toMap() => {
@@ -39,6 +43,8 @@ class Message {
         "repliedMessage": repliedMessage,
         "repliedMessageId": repliedMessageId,
         "repliedMessageSenderId": repliedMessageSenderId,
+    "isFile": isFile,
+    "filePath": filePath,
       };
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -54,6 +60,8 @@ class Message {
       repliedMessage: json['repliedMessage'],
       repliedMessageId: json['repliedMessageId'],
       repliedMessageSenderId: json['repliedMessageSenderId'],
+      isFile: json['isFile'] ?? false,
+      filePath: json['filePath'],
     );
   }
 }

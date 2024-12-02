@@ -1,13 +1,13 @@
 
 class UserData {
-  String? uid;
-  String? name;
-  String? email;
+  String uid;
+  String name;
+  String email;
   bool isOnline;
+  String imageUrl;
 
 
-
-  UserData({required this.uid,required this.name,required this.email, required this.isOnline});
+  UserData({required this.uid,required this.name,required this.email, required this.isOnline, required this.imageUrl});
 
 
   Map<String, dynamic> toMap() => {
@@ -15,6 +15,7 @@ class UserData {
     'name': name,
     'email': email,
     'isOnline': isOnline,
+    'photoUrl': imageUrl,
   };
 
 
@@ -23,6 +24,7 @@ class UserData {
     name: map['name'],
     email: map['email'],
     isOnline: map['isOnline'],
+    imageUrl: map['photoUrl'],
   );
 
   //from json
@@ -31,5 +33,6 @@ class UserData {
     name: json['name'],
     email: json['email'],
     isOnline: json['isOnline'],
+    imageUrl: json['photoUrl'],
   );
 }

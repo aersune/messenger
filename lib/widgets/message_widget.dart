@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:messenger/provider/chat_service.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +21,9 @@ class _SendMessageWidgetState extends State<SendMessageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery
+        .of(context)
+        .size;
     final theme = context.watch<ThemeProvider>();
     final chatProvider = Provider.of<ChatService>(context, listen: false);
     final chatWatcher = context.watch<ChatService>();
@@ -52,11 +53,12 @@ class _SendMessageWidgetState extends State<SendMessageWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
         child: TextField(
           enabled: true,
+          autofocus: false,
           focusNode: chatWatcher.messageFocusNode,
           controller: chatProvider.messageController,
           minLines: 1,
           maxLines: 5,
-          style:  const TextStyle(color: AppColors.light),
+          style: const TextStyle(color: AppColors.light),
           textAlign: TextAlign.left,
           decoration: InputDecoration(
 
@@ -95,7 +97,13 @@ class _SendMessageWidgetState extends State<SendMessageWidget> {
               height: 40,
               child: IconButton(
                   onPressed: () {
-                    print('adadw');
+                    chatProvider.sendImageMessage(receiverId: widget.receiverUserId,
+                        isReply: chatWatcher.isReplying,
+                        replyUser: chatWatcher.repliedMessageSenderId,
+                        replyMessId: chatWatcher.editingMessageId,
+                        repliedMessage: chatWatcher.repliedMessageSenderId,
+
+                    );
                   },
                   style: IconButton.styleFrom(
                     backgroundColor: theme.isDark ? AppColors.darkButton : AppColors.primary2,

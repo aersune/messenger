@@ -1,11 +1,10 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 class UserStatus {
-
   final String status;
-  final int timestamp;
+  final dynamic timestamp;
 
   UserStatus({
     required this.status,
@@ -16,6 +15,13 @@ class UserStatus {
     return UserStatus(
       status: data['status'] ?? '',
       timestamp: data['timestamp'] ?? '',
+    );
+  }
+
+  factory UserStatus.fromJson(Map<dynamic, dynamic> json) {
+    return UserStatus(
+      status: json['status'] ?? '',
+      timestamp: json['timestamp'] ?? '',
     );
   }
 }
@@ -37,7 +43,7 @@ class UserStatusService with ChangeNotifier {
   void setData() async {
     DatabaseReference ref = FirebaseDatabase.instance.ref("status/${_auth.currentUser!.uid}");
     await ref.set({
-      'isOnline': 'online',
+      'status': 'online',
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
@@ -47,11 +53,15 @@ class UserStatusService with ChangeNotifier {
       'status': 'online',
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     }).then((value) {
-      print('Status updated successfully');
+      if (kDebugMode) {
+        print('Status updated successfully');
+      }
     }).catchError((error) {
-      print('Failed to update status: $error');
+      if (kDebugMode) {
+        print('Failed to update status: $error');
+      }
     });
-    print('update');
+
   }
 
   void _onAuthStateChange() {
@@ -62,13 +72,18 @@ class UserStatusService with ChangeNotifier {
 
   void _onDisconnect() {
     _databaseRef.child('status').child(_auth.currentUser!.uid).onDisconnect().set({
-      'isOnline': 'offline',
+      'status': 'offline',
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
 
   void init() {
     setData();
+    _onAuthStateChange();
+    _onDisconnect();
+  }
+
+  void update() {
     _onAuthStateChange();
     _onDisconnect();
   }
