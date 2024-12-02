@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:messenger/model/user.dart';
 import 'package:messenger/widgets/drawer_menu.dart';
-import 'package:messenger/widgets/list.dart';
 import 'package:messenger/widgets/user_card.dart';
 import 'package:provider/provider.dart';
 import '../provider/chat_service.dart';
@@ -43,10 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ListWood()),
-              );
+
             },
             icon: const Icon(
               CupertinoIcons.search,
