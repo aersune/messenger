@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -38,13 +39,27 @@ class ChatService extends ChangeNotifier {
     notifyListeners();
   }
 
-
-  // scrollEvent(bool isScroll) {
-  //   isScrolling = isScroll;
-  //   print('provider scrolll: $isScrolling');
-  //
-  //   notifyListeners();
-  // }
+  void showImagePopup(BuildContext context, String imageUrl) {
+    final size = MediaQuery.of(context).size;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            content: Container(
+              width: size.width * 0.8,
+              height: size.width * 0.6,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: CachedNetworkImageProvider(imageUrl),
+                    fit: BoxFit.cover,
+                  )
+              ),
+            )
+        );
+      },
+    );
+  }
 
   Future<void> getUserData() async {
     final user = _firebaseAuth.currentUser;

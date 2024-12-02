@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:messenger/provider/chat_service.dart';
 import 'package:messenger/screens/profile.dart';
 import 'package:messenger/utils/colors.dart';
@@ -29,6 +28,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
     final theme = context.watch<ThemeProvider>();
     UserData user = chatService.userData;
     final size = MediaQuery.of(context).size;
+    final chatRead = context.read<ChatService>();
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.7,
@@ -47,15 +47,23 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 currentAccountPicture: Stack(
                   children: [
                     Positioned.fill(
-                      child: InstaImageViewer(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: CachedNetworkImage(
-                            placeholder: (context, url) => const CircularProgressIndicator(),
-                            errorWidget: (context, url, error) => const Icon(Icons.error),
-                            imageUrl: user.imageUrl,
+                      child: GestureDetector(
+                        onTap: () {
+                          chatRead.showImagePopup(context, user.imageUrl);
+                        },
+                        child: CachedNetworkImage(
+                          placeholder: (context, url) => const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                          imageUrl: user.imageUrl,
+                          imageBuilder: (context, imageProvider) => Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),)
 
-                          ),
                         ),
                       ),
                     ),
