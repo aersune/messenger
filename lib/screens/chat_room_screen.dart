@@ -291,11 +291,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          SchedulerBinding.instance.addPostFrameCallback((_) async {
-            _itemScrollController.jumpTo(
-              index: snapshot.data!.docs.length - 1,
-            );
-          });
+          // SchedulerBinding.instance.addPostFrameCallback((_) async {
+          //   _itemScrollController.jumpTo(
+          //     index: snapshot.data!.docs.length - 1,
+          //   );
+          // });
           return ScrollablePositionedList.builder(
             itemScrollController: _itemScrollController,
             physics: const ClampingScrollPhysics(),
