@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:messenger/provider/chat_service.dart';
+import 'package:messenger/screens/auth/login_screen.dart';
 import 'package:messenger/screens/profile.dart';
 import 'package:messenger/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +40,6 @@ class _DrawerMenuState extends State<DrawerMenu> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              //drawer header
               UserAccountsDrawerHeader(
                 decoration: BoxDecoration(
                   color: theme.isDark ? AppColors.dark2 : AppColors.primary,
@@ -150,6 +150,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
               ListTile(
                 onTap: () {
                   prov.firebaseAuth.signOut();
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>  LoginScreen(onSignIn: (){})));
                 },
                 leading: const Icon(Icons.logout),
                 title: const Text("Logout"),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:messenger/auth_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,7 +24,10 @@ void main() async {
       ChangeNotifierProvider(create: (context) => UserStatusService()),
     ],
     child: const MyApp(),
+
   ));
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+
 }
 
 class MyApp extends StatelessWidget {
