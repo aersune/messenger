@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+   
 </head>
 <body style="font-family: 'Open Sans', sans-serif;">
     <h1 style="color: #2c3e50;">Messenger App</h1>
@@ -63,13 +63,13 @@
     <td><img src="https://github.com/user-attachments/assets/5123d2be-c2eb-48ae-8bd2-b73e3dd5b7d7" width=270></td>
     <td><img src="https://github.com/user-attachments/assets/1837abfc-ba38-4610-9f52-3cb0b8f51eaa" width=270></td>
     <td><img src="https://github.com/user-attachments/assets/83d23f72-a589-4fa7-bc70-b2dce9e4bad2" width=270></td>
-
+ 
   </tr>
  </table>
 
 
 
-
+ 
 
 
    </p>
