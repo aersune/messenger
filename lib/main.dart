@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:messenger/auth_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:messenger/provider/auth_servive.dart';
@@ -52,7 +51,7 @@ class MyApp extends StatelessWidget {
                 color: Colors.white,
               ),
               backgroundColor: theme.isDark ? AppColors.dark : AppColors.primary,
-              titleTextStyle: GoogleFonts.openSans(
+              titleTextStyle: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

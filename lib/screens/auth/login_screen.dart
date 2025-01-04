@@ -1,7 +1,5 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:messenger/utils/colors.dart';
 import 'package:messenger/widgets/social_buttons_widget.dart';
 
@@ -73,8 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            Text("Login to your account",
-                                style: GoogleFonts.playfairDisplay(
+                            const Text("Login to your account",
+                                style: TextStyle(
                                   fontSize: 20,
                                   color: AppColors.light,
                                   fontWeight: FontWeight.w600,
